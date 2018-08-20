@@ -21,63 +21,67 @@ int main()
 	servaddr.sin_port = htons(PORT);
 
 	// Bind the socket with the server address
-	bind_e(sockfd, (const struct sockaddr *)&servaddr,sizeof(servaddr))
+	bind_e(sockfd, (const struct sockaddr *)&servaddr,sizeof(servaddr));
 
 	socklen_t len;int  m;
-	int ki=((n*8)/(2*a));
+	int ki=((n*8)/(2*BIT_WIDTH));
 	float aop=ki;
 	int co=ceil(MAX/aop);
 	while(count!=co)
 	{
 		count++;
 		m = recvfrom(sockfd, (struct packet *)recvpacket, sizeof(struct packet),MSG_WAITALL, ( struct sockaddr *) &cliaddr,&len);
-		int i[(n*8)/(2*a)] = {0},q[(n*8)/(2*a)] = {0};
+		int i[(n*8)/(2*BIT_WIDTH)] = {0},q[(n*8)/(2*BIT_WIDTH)] = {0};
 		int remaining=0;
 		int j=0;
 		int iq,f;
+		headdecode((unsigned char)recvpacket->header.first_byte,&c,&reserved,&pr);
+		
+		/*
 		f = (unsigned char)recvpacket->header.first_byte;
 		c = f%2;
 		reserved = ((f-c)%16)/2;
 		pr = (f-(2*reserved +c))/16;
-		for(int r=0;r<((n)*8)/(2*a);r++)
+		*/
+		for(int r=0;r<((n)*8)/(2*BIT_WIDTH);r++)
 		{
 			for(int m=0;m<2;m++)
 			{
-				if(remaining+a<=16)
+				if(remaining+BIT_WIDTH<=16)
 				{
-					iq=lb1(recvpacket->payloads.IQ[j],8-remaining,a);j++;
-					if((a+remaining-8)==8)
+					iq=lb1(recvpacket->payloads.IQ[j],8-remaining,BIT_WIDTH);j++;
+					if((BIT_WIDTH+remaining-8)==8)
 					{
-						iq=iq+fb1(recvpacket->payloads.IQ[j],a+remaining-8);
-						remaining=(remaining+a-8)%8;j++;
+						iq=iq+fb1(recvpacket->payloads.IQ[j],BIT_WIDTH+remaining-8);
+						remaining=(remaining+BIT_WIDTH-8)%8;j++;
 					}
 					else
 					{
-						iq=iq+fb1(recvpacket->payloads.IQ[j],a+remaining-8);
-						remaining=(remaining+a-8)%8;
+						iq=iq+fb1(recvpacket->payloads.IQ[j],BIT_WIDTH+remaining-8);
+						remaining=(remaining+BIT_WIDTH-8)%8;
 					}
 				}
-				else if(remaining+a<=24)
+				else if(remaining+BIT_WIDTH<=24)
 				{
-					iq=lb1(recvpacket->payloads.IQ[j],8-remaining,a);j++;
-					iq=iq+mb1(recvpacket->payloads.IQ[j],8-remaining,a);j++;
-					if(a+remaining-16==8)
+					iq=lb1(recvpacket->payloads.IQ[j],8-remaining,BIT_WIDTH);j++;
+					iq=iq+mb1(recvpacket->payloads.IQ[j],8-remaining,BIT_WIDTH);j++;
+					if(BIT_WIDTH+remaining-16==8)
 					{
-						iq=iq+fb1(recvpacket->payloads.IQ[j],a+remaining-16);
-						remaining=(a+remaining-16)%8;j++;
+						iq=iq+fb1(recvpacket->payloads.IQ[j],BIT_WIDTH+remaining-16);
+						remaining=(BIT_WIDTH+remaining-16)%8;j++;
 					}
 					else
 					{
-						iq=iq+fb1(recvpacket->payloads.IQ[j],a+remaining-16);
-						remaining=(a+remaining-16)%8;
+						iq=iq+fb1(recvpacket->payloads.IQ[j],BIT_WIDTH+remaining-16);
+						remaining=(BIT_WIDTH+remaining-16)%8;
 					}
 				}
 				if(m == 0) i[r]=iq;
 				else q[r]=iq;
 			}
 		}
-		int ju=(n*8)/(2*a);
-		for(int hu=0;hu<((n)*8)/(2*a);hu++)
+		int ju=(n*8)/(2*BIT_WIDTH);
+		for(int hu=0;hu<((n)*8)/(2*BIT_WIDTH);hu++)
 		{
 			outputi[hu+(recvpacket->payloads.seq_id*ju)]=i[hu];
 			outputq[hu+(recvpacket->payloads.seq_id*ju)]=q[hu];

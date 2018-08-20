@@ -3,7 +3,7 @@ int main()
 {
 	int pcount = 0;
 	struct packet *sending_msg = malloc(sizeof(struct packet));
-	int in[2*((n*8)/(2*a))] = {0};
+	int in[2*((n*8)/(2*BIT_WIDTH))] = {0};
 	for(int nu = 0;nu < n;nu++)
 	{
 		sending_msg->payloads.IQ[nu] = '\0';
@@ -33,50 +33,50 @@ int main()
 	int t = 0;
 	while(!feof(fpt))
 	{
-		if((t%2 == 0) && (t == 2*((n*8)/(2*a))))
+		if((t%2 == 0) && (t == 2*((n*8)/(2*BIT_WIDTH))))
 		{
 			int iq;
 			int j = 0;
 			int remaining = 0;
-			for(int hu = 0;hu < 2*((n*8)/(2*a));hu+=2)
+			for(int hu = 0;hu < 2*((n*8)/(2*BIT_WIDTH));hu+=2)
 			{
 				printf("%d %d \n",in[hu],in[hu+1]);
 			}
-			for(int r = 0;r < 2*((n*8)/(2*a));r += 2)
+			for(int r = 0;r < 2*((n*8)/(2*BIT_WIDTH));r += 2)
 			{
 				iq = in[r];
 				for(int m = 0;m < 2;m++)
 				{
-					if(remaining+a <= 16)
+					if(remaining+BIT_WIDTH <= 16)
 					{
-						sending_msg->payloads.IQ[j] = sending_msg->payloads.IQ[j]+fb(iq,8-remaining,a);
+						sending_msg->payloads.IQ[j] = sending_msg->payloads.IQ[j]+fb(iq,8-remaining,BIT_WIDTH);
 						j++;
-						if((a+remaining-8) == 8)
+						if((BIT_WIDTH+remaining-8) == 8)
 						{
-							sending_msg->payloads.IQ[j] = lb(iq,a+remaining-8,a);
-							remaining = (a+remaining-8)%8;
+							sending_msg->payloads.IQ[j] = lb(iq,BIT_WIDTH+remaining-8,BIT_WIDTH);
+							remaining = (BIT_WIDTH+remaining-8)%8;
 							j++;
 						}
 						else
-						{	sending_msg->payloads.IQ[j] = lb(iq,a+remaining-8,a);
-							remaining = (a+remaining-8)%8;
+						{	sending_msg->payloads.IQ[j] = lb(iq,BIT_WIDTH+remaining-8,BIT_WIDTH);
+							remaining = (BIT_WIDTH+remaining-8)%8;
 						}
 					}
-					else if(a+remaining<=24)
+					else if(BIT_WIDTH+remaining<=24)
 					{
-						sending_msg->payloads.IQ[j]=sending_msg->payloads.IQ[j]+fb(iq,8-remaining,a);
+						sending_msg->payloads.IQ[j]=sending_msg->payloads.IQ[j]+fb(iq,8-remaining,BIT_WIDTH);
 						j++;
-						sending_msg->payloads.IQ[j]=mb(iq,8-remaining,a);
+						sending_msg->payloads.IQ[j]=mb(iq,8-remaining,BIT_WIDTH);
 						j++;
-						if((a+remaining-16)==8)
+						if((BIT_WIDTH+remaining-16)==8)
 						{
-							sending_msg->payloads.IQ[j]=lb(iq,a+remaining-16,a);
-							remaining=(a+remaining-16)%8;
+							sending_msg->payloads.IQ[j]=lb(iq,BIT_WIDTH+remaining-16,BIT_WIDTH);
+							remaining=(BIT_WIDTH+remaining-16)%8;
 							j++;
 						}
 						else
-						{	sending_msg->payloads.IQ[j]=lb(iq,a+remaining-16,a);
-							remaining=(a+remaining-16)%8;
+						{	sending_msg->payloads.IQ[j]=lb(iq,BIT_WIDTH+remaining-16,BIT_WIDTH);
+							remaining=(BIT_WIDTH+remaining-16)%8;
 						}
 					}
 				iq=in[r+1];
@@ -92,7 +92,7 @@ int main()
 			}
 			sending_msg->payloads.seq_id++;
 			t = 0;
-			for(int g = 0;g < 2*((n*8)/(2*a));g++)
+			for(int g = 0;g < 2*((n*8)/(2*BIT_WIDTH));g++)
 			{
 				in[g] = 0;
 			}
@@ -105,12 +105,12 @@ int main()
 		int iq;
 		int j = 0;
 		int remaining = 0;
-		for(int hug=0;hug<2*((n*8)/(2*a));hug+=2)
+		for(int hug=0;hug<2*((n*8)/(2*BIT_WIDTH));hug+=2)
 		{
 			printf("%d %d \n",in[hug],in[hug+1]);
 		}
 		float fo = 8.0;
-		int ker = ceil((t*2*a)/f);
+		int ker = ceil((t*2*BIT_WIDTH)/f);
 		sending_msg->header.payloadsize = ker+4;
 		/*
 		f = ((16*pr) + (2*reserved) + c_); // Why f is being reassigned again???
@@ -121,33 +121,33 @@ int main()
 			iq=in[r];
 			for(int m=0;m<2;m++)
 			{
-				if(remaining+a<=16)
+				if(remaining+BIT_WIDTH<=16)
 				{
-					sending_msg->payloads.IQ[j]=sending_msg->payloads.IQ[j]+fb(iq,8-remaining,a);j++;
-					if((a+remaining-8)==8)
+					sending_msg->payloads.IQ[j]=sending_msg->payloads.IQ[j]+fb(iq,8-remaining,BIT_WIDTH);j++;
+					if((BIT_WIDTH+remaining-8)==8)
 					{
-						sending_msg->payloads.IQ[j]=lb(iq,a+remaining-8,a);
-						remaining=(a+remaining-8)%8;j++;
+						sending_msg->payloads.IQ[j]=lb(iq,BIT_WIDTH+remaining-8,BIT_WIDTH);
+						remaining=(BIT_WIDTH+remaining-8)%8;j++;
 					}
 					else
 					{
-						sending_msg->payloads.IQ[j]=lb(iq,a+remaining-8,a);
-						remaining=(a+remaining-8)%8;
+						sending_msg->payloads.IQ[j]=lb(iq,BIT_WIDTH+remaining-8,BIT_WIDTH);
+						remaining=(BIT_WIDTH+remaining-8)%8;
 					}
 				}
-				else if(a+remaining<=24)
+				else if(BIT_WIDTH+remaining<=24)
 				{
-					sending_msg->payloads.IQ[j] = sending_msg->payloads.IQ[j]+fb(iq,8-remaining,a);j++;
-					sending_msg->payloads.IQ[j] = mb(iq,8-remaining,a);j++;
-					if((a+remaining-16)==8)
+					sending_msg->payloads.IQ[j] = sending_msg->payloads.IQ[j]+fb(iq,8-remaining,BIT_WIDTH);j++;
+					sending_msg->payloads.IQ[j] = mb(iq,8-remaining,BIT_WIDTH);j++;
+					if((BIT_WIDTH+remaining-16)==8)
 					{
-						sending_msg->payloads.IQ[j]=lb(iq,a+remaining-16,a);
-					 	remaining=(a+remaining-16)%8;j++;
+						sending_msg->payloads.IQ[j]=lb(iq,BIT_WIDTH+remaining-16,BIT_WIDTH);
+					 	remaining=(BIT_WIDTH+remaining-16)%8;j++;
 					}
 					else
 					{
-						sending_msg->payloads.IQ[j]=lb(iq,a+remaining-16,a);
-					 	remaining=(a+remaining-16)%8;
+						sending_msg->payloads.IQ[j]=lb(iq,BIT_WIDTH+remaining-16,BIT_WIDTH);
+					 	remaining=(BIT_WIDTH+remaining-16)%8;
 					}
 				}
 				iq=in[r+1];

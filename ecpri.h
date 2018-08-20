@@ -20,13 +20,20 @@
 
 // Include headers END
 
+// typedefs START
+
+typedef short int si;
+
+// typedefs END
+
 // Constants declaration BEGIN
 
 #define n 1000
-#define a 12
+#define BIT_WIDTH 12
 #define PORT 8080
 #define MAXLINE 1024
 #define MAX 69362
+#define MAX_SIZE_FOR_EVENTS 256
 
 // Constants declaration END
 
@@ -54,8 +61,8 @@ int lb1(char c,int r,int o);
 
 //wrapper function description for error handling BEGIN
 
-int socket_e(int family,int type,int protocol)
-int bind_e(int sockfd, const struct sockaddr *addr,socklen_t addrlen)
+int socket_e(int family,int type,int protocol);
+int bind_e(int sockfd, const struct sockaddr *addr,socklen_t addrlen);
 
 //wrapper function description for error handling END
 
@@ -139,6 +146,18 @@ int headencode()
 
 // Function description to encode header END
 
+// Function description to decode header BEGIN
+
+void headdecode(int k,si* c,si* reserved,si* pr)
+{
+	*c = k % 2;
+    k /= 2;
+    *reserved = k % 8;
+    k /= 8; 
+    *pr = k;
+}
+
+// Function description to decode header END
 
 //required IQ_structures BEGIN
 
@@ -163,21 +182,21 @@ struct packet{
 
 int socket_e(int family,int type,int protocol)
 {
-	int n;
-	if ( (n = socket(AF_INET, SOCK_DGRAM, 0)) < 0 )
+	int k;
+	if ( (k = socket(AF_INET, SOCK_DGRAM, 0)) < 0 )
 	{
 	    perror("socket creation failed");
 	}
-	return n;
+	return k;
 }
 int bind_e(int sockfd, const struct sockaddr *addr,socklen_t addrlen)
 {
-	int n;
-	if ( (n = bind(sockfd, (const struct sockaddr *)&servaddr,sizeof(servaddr)))< 0 )
+	int k;
+	if ( (k = bind(sockfd, (const struct sockaddr *)&addr,sizeof(addr)))< 0 )
 	{
 		perror("bind failed");
 	}
-	return n;
+	return k;
 }
 
 //wrapper function description for error handling END
